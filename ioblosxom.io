@@ -27,11 +27,14 @@ IoBlosxom := Object clone do (
 	)
 
 	run := method(
-		self pathInfo := System getenv("PATH_INFO") ifNilEval("/") split("/")
-		self flavour  := pathInfo last afterSeq(".") ifNilEval("html")
+		self pathInfo   := System getenv("PATH_INFO") ifNilEval("/") split("/")
+		self flavour    := pathInfo last afterSeq(".") ifNilEval("html")
 		self pathInfo last clipAfterStartOfSeq(".")
-		self home := System getenv("SCRIPT_NAME") ifNilEval("/")
-		self path := System getenv("SCRIPT_NAME") ifNilEval("/") split("/") removeLast
+		if (self pathInfo last == "index", self pathInfo removeLast)
+		self home       := System getenv("SCRIPT_NAME") ifNilEval("/")
+		self path       := System getenv("SCRIPT_NAME") ifNilEval("/") split("/") removeLast
+		self serverRoot := "http://" .. System getenv("SERVER_NAME")
+		self creator    := ""
 
 		self title := "IoBlosxom"
 		self entries := self filters(self getEntries(Directory with(dataDirectory)))
