@@ -70,7 +70,7 @@ Content-Type: text/html; charset=UTF-8
 	</head>
 	<body>
 		<div id="whole">
-			<h1 id="top"><a href="/"><%=title%></a></h1>
+			<h1 id="top"><a href="<%=home%>/"><%=title%></a></h1>
 
 			<p class="debug"><%=debugObj%></p>
 
@@ -78,10 +78,16 @@ Content-Type: text/html; charset=UTF-8
 				<div class="hfeed">
 					<% entries foreach(entry, %>
 					<div class="entry">
-						<h2 class="entry-title"><%=entry title%></h2>
+						<h2 class="entry-title">
+							<a href="<%=home%><%=entry name%>" rel="bookmark">
+								<%=entry title%>
+							</a>
+						</h2>
 						<dl class="entry-information">
 							<dt>DateTime</dt>
-							<dd><%=entry time asString%></dd>
+							<dd><%=entry date asString%></dd>
+							<dt>Path</dt>
+							<dd><%=entry name%></dd>
 						</dl>
 						<div class="content">
 							<%==entry body join%>

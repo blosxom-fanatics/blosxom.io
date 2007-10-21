@@ -1,17 +1,24 @@
 #!/usr/bin/env io
 # vim:ft=io:
 
-#f := CGI clone parse
-#f print
-
 doFile("eio.io")
 
+Object p := method(
+	writeln(self)
+	self
+)
+
 IoBlosxom := Object clone do (
+
+	dataDirectory := "data"
+	title         := "IoBlosxom"
+
 	Entry := Object clone do (
 		file  := File clone
+		name  := ""
 		title := ""
 		body  := ""
-		time  := ""
+		date  := ""
 
 		setFile := method(v,
 			self file = v
@@ -23,16 +30,34 @@ IoBlosxom := Object clone do (
 		self pathInfo := System getenv("PATH_INFO") ifNilEval("/") split("/")
 		self flavour  := pathInfo last afterSeq(".") ifNilEval("html")
 		self pathInfo last clipAfterStartOfSeq(".")
+		self home := System getenv("SCRIPT_NAME") ifNilEval("/")
+		self path := System getenv("SCRIPT_NAME") ifNilEval("/") split("/") removeLast
 
 		self title := "IoBlosxom"
-		self entries := self filters(self getEntries(Directory with("data")))
+		self entries := self filters(self getEntries(Directory with(dataDirectory)))
 		self debugObj := list(pathInfo, flavour)
 
 		self show("template.#{flavour}" interpolate, self)
 	)
 
 	filters := method(entries,
-		entries sortInPlace(time) reverse
+		# self pathInfo = list("", "2007", "10")
+		y := self pathInfo at(1) ifNilEval("") asNumber
+		m := self pathInfo at(2) ifNilEval("") asNumber
+		d := self pathInfo at(3) ifNilEval("") asNumber
+		entries sortInPlace(date) reverse select (e,
+			d isNan ifFalse( if (e date day   != d, continue) )
+			m isNan ifFalse( if (e date month != m, continue) )
+			if (y isNan,
+				if (self pathInfo at(1) isNil,
+					true
+				,
+					e name beginsWithSeq(self pathInfo join("/"))
+				)
+			,
+				if (e date year == y, true)
+			)
+		)
 	)
 
 	show := method(templateName, context,
@@ -48,7 +73,8 @@ IoBlosxom := Object clone do (
 			l := f readLines
 			e title = l at(0)
 			e body  = l slice(1)
-			e time  = f lastDataChangeDate
+			e date  = f lastDataChangeDate
+			e name  = f path asMutable removePrefix(dataDirectory) clipAfterStartOfSeq(".")
 			e
 		))
 		dir folders foreach(d,
@@ -56,11 +82,6 @@ IoBlosxom := Object clone do (
 		)
 		ret
 	)
-)
-
-Object p := method(
-	writeln(self)
-	self
 )
 
 e := try (
