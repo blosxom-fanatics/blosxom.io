@@ -1,5 +1,7 @@
 #!/usr/bin/env io
 # vim:ft=io:
+# io blosxom clone
+# http://svn.coderepos.org/share/lang/io/misc/eio.io
 
 doFile("eio.io")
 
